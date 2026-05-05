@@ -1,5 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 export interface OrderItem {
   product_id: number;
   quantity: number;
@@ -26,13 +33,6 @@ export interface Order {
   }>;
 }
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
 interface OrderContextType {
   cart: CartItem[];
   orderHistory: Order[];
@@ -47,9 +47,9 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
-const getAuthHeaders = (): Record<string, string> => {
+const getAuthHeaders = (): Record<string, string> | undefined => {
   const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Token ${token}` } : {};
+  return token ? { 'Authorization': `Token ${token}` } : undefined;
 };
 
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -79,8 +79,9 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const loadOrderHistory = async () => {
     try {
+      const headers = getAuthHeaders();
       const response = await fetch('http://127.0.0.1:8000/api/orders/', {
-        headers: getAuthHeaders(),
+        headers: headers || {},
       });
 
       if (response.ok) {
@@ -130,7 +131,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders(),
+          ...(getAuthHeaders() || {}),
         },
         body: JSON.stringify({
           shipping_address: shippingAddress,

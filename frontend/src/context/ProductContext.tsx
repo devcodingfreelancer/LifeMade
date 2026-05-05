@@ -34,9 +34,9 @@ interface Category {
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-const getAuthHeaders = (): Record<string, string> => {
+const getAuthHeaders = (): Record<string, string> | undefined => {
   const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Token ${token}` } : {};
+  return token ? { 'Authorization': `Token ${token}` } : undefined;
 };
 
 export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -65,8 +65,9 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
       // Load categories (only if authenticated)
       const token = localStorage.getItem('token');
       if (token) {
+        const headers = getAuthHeaders();
         const categoriesResponse = await fetch('http://127.0.0.1:8000/api/categories/', {
-          headers: getAuthHeaders(),
+          headers: headers || {},
         });
         if (categoriesResponse.ok) {
           const categoriesData = await categoriesResponse.json();
@@ -91,7 +92,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders(),
+          ...(getAuthHeaders() || {}),
         },
         body: JSON.stringify(product),
       });
@@ -124,7 +125,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders(),
+          ...(getAuthHeaders() || {}),
         },
         body: JSON.stringify(updates),
       });
@@ -153,9 +154,10 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const deleteProduct = async (id: number) => {
     setIsLoading(true);
     try {
+      const headers = getAuthHeaders();
       const response = await fetch(`http://127.0.0.1:8000/api/products/${id}/`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: headers || {},
       });
 
       if (!response.ok) {
@@ -181,7 +183,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeaders(),
+          ...(getAuthHeaders() || {}),
         },
         body: JSON.stringify(category),
       });

@@ -1,10 +1,10 @@
 import { Heart, HeartOff, ShoppingCart } from 'lucide-react';
-import type { OrderItem } from '../context/OrderContext';
+import type { CartItem } from '../context/OrderContext';
 import type { Product } from '../context/ProductContext';
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (item: OrderItem) => void;
+  onAddToCart: (item: CartItem) => void;
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }
@@ -44,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, isFavor
             <p className="text-2xl font-bold text-slate-900">₹{product.price.toFixed(2)}</p>
           </div>
           <button
-            onClick={() => onAddToCart({ product_id: product.id, quantity: 1 })}
+            onClick={() => onAddToCart({ id: product.id.toString(), name: product.name, price: product.price, quantity: 1 })}
             className="inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
             <ShoppingCart size={18} /> Add
