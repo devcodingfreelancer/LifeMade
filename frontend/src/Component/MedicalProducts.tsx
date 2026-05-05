@@ -51,6 +51,8 @@ const MedicalProducts: React.FC = () => {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
+              title="Filter products by category"
+              aria-label="Product category filter"
               className="rounded-full border border-slate-300 bg-white py-3 px-4 text-sm text-slate-900 shadow-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
             >
               <option value="">All categories</option>
@@ -72,9 +74,9 @@ const MedicalProducts: React.FC = () => {
               <ProductCard
                 key={product.id}
                 product={product}
-                onAddToCart={addToCart}
-                isFavorite={isFavorite(product.id)}
-                onToggleFavorite={() => toggleFavorite(product.id)}
+                onAddToCart={() => addToCart({ id: product.id.toString(), quantity: 1, name: product.name, price: product.price })}
+                isFavorite={isFavorite(product.id.toString())}
+                onToggleFavorite={() => toggleFavorite(product.id.toString())}
               />
             ))}
           </div>

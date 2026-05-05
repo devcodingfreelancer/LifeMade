@@ -81,7 +81,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ productId, onClose, onSuccess
           description: formData.description,
           price,
           stock,
-          category: formData.category,
+          category: parseInt(formData.category, 10),
           image: formData.image || undefined
         });
       }

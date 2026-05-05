@@ -34,7 +34,7 @@ interface Category {
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
-const getAuthHeaders = () => {
+const getAuthHeaders = (): Record<string, string> => {
   const token = localStorage.getItem('token');
   return token ? { 'Authorization': `Token ${token}` } : {};
 };
