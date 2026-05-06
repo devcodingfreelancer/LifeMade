@@ -6,7 +6,7 @@ from .models import Category, Product, Order, OrderItem, ContactUs, Feedback
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
@@ -31,8 +31,12 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        user = authenticate(username=data['email'], password=data['password'])
-        if not user:
+        try:
+            user = User.objects.get(email=data['email'])
+            user = authenticate(username=user.username, password=data['password'])
+            if not user:
+                raise serializers.ValidationError("Invalid credentials")
+        except User.DoesNotExist:
             raise serializers.ValidationError("Invalid credentials")
         data['user'] = user
         return data
