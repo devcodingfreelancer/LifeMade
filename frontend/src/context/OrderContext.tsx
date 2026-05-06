@@ -80,7 +80,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const loadOrderHistory = async () => {
     try {
       const headers = getAuthHeaders();
-      const response = await fetch('http://127.0.0.1:8000/api/orders/', {
+      const response = await fetch('https://lifemade.onrender.com/api/orders/', {
         headers: headers || {},
       });
 
@@ -127,7 +127,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         quantity: item.quantity,
       }));
 
-      const response = await fetch('http://127.0.0.1:8000/api/orders/create/', {
+      const response = await fetch('https://lifemade.onrender.com/api/orders/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/login/', {
+      const response = await fetch('https://lifemade.onrender.com/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/register/', {
+      const response = await fetch('https://lifemade.onrender.com/api/auth/register/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
