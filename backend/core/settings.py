@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-wu3b8!$$=h6&z%1^j-m=%aics-of!od2)2i=or&(y4n58khc1+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'lifemade.onrender.com',
+]
 
 
 # Application definition
@@ -127,6 +131,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5174",
     "http://localhost:5175",
     "http://127.0.0.1:5173",
+    "https://life-made.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
