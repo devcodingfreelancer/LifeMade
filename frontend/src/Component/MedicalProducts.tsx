@@ -31,7 +31,7 @@ const MedicalProducts: React.FC = () => {
   const [showSort,         setShowSort]         = useState(false);
 
   const categories = useMemo(
-    () => Array.from(new Set(products.map((p) => p.category_name))).filter(Boolean),
+    () => Array.from(new Set(products.map((p) => p.category_name))).filter(Boolean) as string[],
     [products]
   );
 
@@ -209,6 +209,8 @@ const MedicalProducts: React.FC = () => {
               max={globalMax}
               step={100}
               value={maxPrice}
+              title="Filter by maximum price"
+              aria-label="Maximum price range"
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="w-full accent-emerald-600"
             />
@@ -219,7 +221,7 @@ const MedicalProducts: React.FC = () => {
             {maxPrice < globalMax && (
               <button
                 onClick={() => setMaxPrice(globalMax)}
-                className="mt-3 w-full text-xs font-semibold text-slate-500 hover:text-red-500 transition flex items-center justify-center gap-1"
+                className="mt-3 w-full text-xs font-semibold text-slate-500 hover:text-red-500 transition flex items-center justify-center gap-1" title="Reset price filter"
               >
                 <X size={11} /> Clear price filter
               </button>
@@ -245,7 +247,7 @@ const MedicalProducts: React.FC = () => {
               {selectedCategory && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 border border-emerald-200 px-3 py-1 text-sm font-semibold text-emerald-800">
                   {selectedCategory}
-                  <button onClick={() => setSelectedCategory('')} className="hover:text-red-600 transition">
+                  <button onClick={() => setSelectedCategory('')} className="hover:text-red-600 transition" aria-label="Remove category filter">
                     <X size={13} />
                   </button>
                 </span>
@@ -253,7 +255,7 @@ const MedicalProducts: React.FC = () => {
               {searchTerm && (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-sm font-semibold text-slate-700">
                   "{searchTerm}"
-                  <button onClick={() => setSearchTerm('')} className="hover:text-red-600 transition">
+                  <button onClick={() => setSearchTerm('')} className="hover:text-red-600 transition" aria-label="Remove search filter">
                     <X size={13} />
                   </button>
                 </span>

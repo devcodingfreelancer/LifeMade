@@ -11,7 +11,6 @@ import { useFavorites } from '../../context/FavoriteContext';
 
 interface HomeMainProps {
   onShopNow?: () => void;
-  onOpenCart?: () => void;
 }
 
 const categoryData = [
@@ -28,7 +27,7 @@ const trustFeatures = [
   { icon: Star,      title: '4.9★ Rated',     sub: 'Trusted by 2.5L+ customers'  },
 ];
 
-export default function HomeMain({ onShopNow, onOpenCart }: HomeMainProps) {
+export default function HomeMain({ onShopNow }: HomeMainProps) {
   const { products } = useProducts();
   const { addToCart } = useOrders();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -41,7 +40,7 @@ export default function HomeMain({ onShopNow, onOpenCart }: HomeMainProps) {
   const productCategories = useMemo(
     () => ['All', ...Array.from(new Set(products.map((p) => p.category_name).filter(Boolean)))],
     [products]
-  );
+  ) as string[];
 
   // Filter + slice
   const filtered = useMemo(() => {

@@ -26,7 +26,6 @@ export default function EnhancedHeader({
 }: HeaderProps) {
   const { user, logout } = useAuth();
   const { cartCount } = useOrders();
-  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Scroll effect
@@ -83,8 +82,6 @@ export default function EnhancedHeader({
               <div
                 key={index}
                 className="relative py-1 group cursor-pointer"
-                onMouseEnter={() => setActiveDropdown(index)}
-                onMouseLeave={() => setActiveDropdown(null)}
                 onClick={() => onMenuClick?.(item.name)}
               >
                 <span className="text-sm font-semibold text-slate-600 group-hover:text-green-600 transition-colors">
