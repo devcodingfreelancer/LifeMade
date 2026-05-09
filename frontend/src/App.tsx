@@ -92,7 +92,7 @@ function AppContent() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'home':
-        return <HomeMain onShopNow={handleShopNow} onOpenCart={() => setShowCart(true)} />
+        return <HomeMain onShopNow={handleShopNow} />
       case 'medicine':
         return <MedicalProducts />
       case 'admin':
@@ -100,7 +100,7 @@ function AppContent() {
       case 'orders':
         return <OrderHistory onBack={() => setCurrentView('home')} />
       default:
-        return <HomeMain onShopNow={handleShopNow} onOpenCart={() => setShowCart(true)} />
+        return <HomeMain onShopNow={handleShopNow} />
     }
   }
 
