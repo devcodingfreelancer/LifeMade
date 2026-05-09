@@ -40,6 +40,7 @@ interface OrderContextType {
   cartTotal: number;
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
   placeOrder: (shippingAddress: string) => Promise<void>;
   loadOrderHistory: () => Promise<void>;
@@ -111,6 +112,16 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCart((currentCart) => currentCart.filter((item) => item.id !== id));
   };
 
+  const updateQuantity = (id: string, delta: number) => {
+    setCart((currentCart) =>
+      currentCart
+        .map((item) =>
+          item.id === id ? { ...item, quantity: item.quantity + delta } : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
   const clearCart = () => {
     setCart([]);
   };
@@ -164,6 +175,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cartTotal,
       addToCart,
       removeFromCart,
+      updateQuantity,
       clearCart,
       placeOrder,
       loadOrderHistory,

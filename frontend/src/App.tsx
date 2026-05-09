@@ -13,10 +13,15 @@ import OrderHistory from './Component/OrderHistory'
 import MedicalProducts from './Component/MedicalProducts'
 import AdminPanel from './Component/AdminPanel'
 import Footer from './Component/Footer'
+import CartDrawer from './Component/CartDrawer'
+import CheckoutModal from './Component/CheckoutModal'
+import FloatingCartBar from './Component/FloatingCartBar'
 
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
+  const [showCart, setShowCart] = useState(false)
+  const [showCheckout, setShowCheckout] = useState(false)
   const [currentView, setCurrentView] = useState<'home' | 'medicine' | 'admin' | 'orders'>('home')
   const { isAuthenticated, user } = useAuth()
 
@@ -70,10 +75,24 @@ function AppContent() {
     setCurrentView('home')
   }
 
+  const handleCheckout = () => {
+    setShowCart(false)
+    if (!isAuthenticated) {
+      setShowLogin(true)
+      return
+    }
+    setShowCheckout(true)
+  }
+
+  const handleShopNow = () => {
+    setCurrentView('medicine')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'home':
-        return <HomeMain />
+        return <HomeMain onShopNow={handleShopNow} onOpenCart={() => setShowCart(true)} />
       case 'medicine':
         return <MedicalProducts />
       case 'admin':
@@ -81,13 +100,18 @@ function AppContent() {
       case 'orders':
         return <OrderHistory onBack={() => setCurrentView('home')} />
       default:
-        return <HomeMain />
+        return <HomeMain onShopNow={handleShopNow} onOpenCart={() => setShowCart(true)} />
     }
   }
 
   return (
     <>
-      <Header onLoginClick={handleLoginClick} onOrdersClick={handleOrdersClick} onMenuClick={handleMenuClick} />
+      <Header
+        onLoginClick={handleLoginClick}
+        onOrdersClick={handleOrdersClick}
+        onMenuClick={handleMenuClick}
+        onCartClick={() => setShowCart(true)}
+      />
 
       {showLogin && (
         <Login onSuccess={handleLoginSuccess} onClose={() => setShowLogin(false)} onSwitchToSignup={handleSignupClick} />
@@ -97,7 +121,21 @@ function AppContent() {
         <Signup onSuccess={handleSignupSuccess} onClose={() => setShowSignup(false)} onSwitchToLogin={handleLoginClick} />
       )}
 
+      <CartDrawer
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        onCheckout={handleCheckout}
+      />
+
+      <CheckoutModal
+        isOpen={showCheckout}
+        onClose={() => setShowCheckout(false)}
+      />
+
       {renderCurrentView()}
+
+      <FloatingCartBar onOpenCart={() => setShowCart(true)} />
+
       <Footer />
     </>
   )
