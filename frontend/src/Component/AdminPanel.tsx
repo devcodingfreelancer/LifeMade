@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductContext';
-import { LogOut, BarChart3, Package, DollarSign, ShoppingCart } from 'lucide-react';
+import { LogOut, BarChart3, Package, ShoppingCart } from 'lucide-react';
 import ProductsList from './ProductsList';
 import AdminOrdersList from './AdminOrdersList';
 

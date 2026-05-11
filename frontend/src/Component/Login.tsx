@@ -37,23 +37,6 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onClose, onSwitchToSignup }) =
     }
   };
 
-  const handleDemoLogin = async () => {
-    setError('');
-    setSuccess('');
-    setIsLoading(true);
-    
-    try {
-      await login('admin@ecommerce.com', 'admin123');
-      setSuccess('Login successful! Redirecting...');
-      onSuccess?.();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Demo login failed';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
         <div className="relative w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl">

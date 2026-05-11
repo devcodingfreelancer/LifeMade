@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Edit2, Trash2 } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
 interface OrderItem {
   id: number;
