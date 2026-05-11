@@ -81,7 +81,16 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const loadOrderHistory = async () => {
     try {
       const headers = getAuthHeaders();
-      const response = await fetch('https://lifemade.onrender.com/api/orders/', {
+      // Check if user is admin
+      const user = localStorage.getItem('user');
+      const isAdmin = user ? JSON.parse(user).role === 'admin' : false;
+      
+      // Use admin orders endpoint for admins, regular orders endpoint for users
+      const endpoint = isAdmin 
+        ? 'https://lifemade.onrender.com/api/admin/orders/' 
+        : 'https://lifemade.onrender.com/api/orders/';
+      
+      const response = await fetch(endpoint, {
         headers: headers || {},
       });
 

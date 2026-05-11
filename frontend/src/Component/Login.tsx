@@ -70,11 +70,8 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onClose, onSwitchToSignup }) =
           </div>
         
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Admin Login
+          Login
         </h1>
-        <p className="text-center text-gray-600 mb-6">
-          Sign in to access the admin panel
-        </p>
 
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm">
@@ -143,22 +140,6 @@ const Login: React.FC<LoginProps> = ({ onSuccess, onClose, onSwitchToSignup }) =
           </p>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="font-semibold text-gray-800 mb-3">Quick Demo Access:</p>
-          <button
-            type="button"
-            onClick={handleDemoLogin}
-            disabled={isLoading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-2 rounded-lg transition duration-200 mb-3"
-          >
-            {isLoading ? 'Logging in...' : 'Login with Demo Account'}
-          </button>
-          <p className="text-xs text-gray-600">
-            <span className="font-semibold">Demo Credentials:</span><br/>
-            Email: <code className="bg-white px-2 py-1 rounded text-gray-800">admin@ecommerce.com</code><br/>
-            Password: <code className="bg-white px-2 py-1 rounded text-gray-800">admin123</code>
-          </p>
-        </div>
         </div>
       </div>
   );

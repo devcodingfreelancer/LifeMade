@@ -8,14 +8,16 @@ interface OrderHistoryProps {
 
 const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
   const { orderHistory } = useOrders();
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const isAdmin = user.role === 'admin';
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-emerald-600">My Orders</p>
-            <h1 className="mt-3 text-4xl font-bold text-slate-900">Your order history</h1>
+            <p className="text-sm uppercase tracking-[0.3em] text-emerald-600">{isAdmin ? 'All Orders' : 'My Orders'}</p>
+            <h1 className="mt-3 text-4xl font-bold text-slate-900">{isAdmin ? 'All customer orders' : 'Your order history'}</h1>
           </div>
           <button
             onClick={onBack}
@@ -58,7 +60,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
                     </div>
                     <div>
                       <p className="text-sm text-slate-500">Total</p>
-                      <p className="mt-1 text-lg font-semibold text-slate-900">₹{order.total_amount.toFixed(2)}</p>
+                      <p className="mt-1 text-lg font-semibold text-slate-900">₹{typeof order.total_amount === 'string' ? parseFloat(order.total_amount).toFixed(2) : order.total_amount.toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
@@ -87,14 +89,17 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
                     <span>Price</span>
                     <span className="text-right">Subtotal</span>
                   </div>
-                  {order.items.map((item) => (
+                  {order.items.map((item) => {
+                    const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
+                    return (
                     <div key={item.id} className="grid gap-3 px-6 py-4 text-sm text-slate-700 sm:grid-cols-4">
                       <span>{item.product.name}</span>
                       <span>{item.quantity}</span>
-                      <span>₹{item.price.toFixed(2)}</span>
-                      <span className="text-right">₹{(item.price * item.quantity).toFixed(2)}</span>
+                      <span>₹{price.toFixed(2)}</span>
+                      <span className="text-right">₹{(price * item.quantity).toFixed(2)}</span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}

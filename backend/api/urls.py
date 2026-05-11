@@ -20,6 +20,7 @@ urlpatterns = [
     path('orders/create/', views.OrderCreateView.as_view(), name='order-create'),
     path('orders/<int:pk>/', views.OrderDetailView.as_view(), name='order-detail'),
     path('admin/orders/', views.AdminOrderListView.as_view(), name='admin-order-list'),
+    path('admin/orders/<int:pk>/', views.AdminOrderDetailView.as_view(), name='admin-order-detail'),
 
     # Contact Us
     path('contact/', views.ContactUsView.as_view(), name='contact-us'),

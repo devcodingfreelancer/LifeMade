@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductContext';
 import { LogOut, BarChart3, Package, DollarSign, ShoppingCart } from 'lucide-react';
 import ProductsList from './ProductsList';
+import AdminOrdersList from './AdminOrdersList';
 
 const AdminPanel: React.FC = () => {
   const { user, logout } = useAuth();
   const { products } = useProducts();
+  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -75,10 +77,10 @@ const AdminPanel: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium">Inventory Value</p>
-                <p className="text-3xl font-bold text-gray-800 mt-2">${totalValue.toFixed(2)}</p>
+                <p className="text-3xl font-bold text-gray-800 mt-2">₹{totalValue.toFixed(2)}</p>
               </div>
               <div className="bg-green-100 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-green-600" />
+                <BarChart3 className="w-6 h-6 text-green-600" />
               </div>
             </div>
           </div>
@@ -111,8 +113,33 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
 
-        {/* Products Section */}
-        <ProductsList />
+        {/* Tabs */}
+        <div className="flex gap-4 border-b border-gray-200 mb-8">
+          <button
+            onClick={() => setActiveTab('products')}
+            className={`px-6 py-3 font-semibold transition ${
+              activeTab === 'products'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Products
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`px-6 py-3 font-semibold transition ${
+              activeTab === 'orders'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            Orders
+          </button>
+        </div>
+
+        {/* Content */}
+        {activeTab === 'products' && <ProductsList />}
+        {activeTab === 'orders' && <AdminOrdersList />}
       </main>
     </div>
   );

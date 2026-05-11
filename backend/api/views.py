@@ -81,6 +81,11 @@ class AdminOrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAdminUser]
 
+class AdminOrderDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [permissions.IsAdminUser]
+
 # Contact Us View
 class ContactUsView(generics.CreateAPIView):
     queryset = ContactUs.objects.all()
