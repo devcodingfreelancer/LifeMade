@@ -12,8 +12,13 @@ interface CheckoutModalProps {
 
 type Step = 'summary' | 'address' | 'placing' | 'success';
 
+const FREE_DELIVERY_THRESHOLD = 1500;
+
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { cart, cartTotal, placeOrder, clearCart } = useOrders();
+  const isFreeDelivery = cartTotal >= FREE_DELIVERY_THRESHOLD;
+  const deliveryCharge = isFreeDelivery ? 0 : 49;
+  const orderTotal = cartTotal + deliveryCharge;
   const [step, setStep] = useState<Step>('summary');
   const [address, setAddress] = useState({
     line1: '', city: '', state: '', pincode: '', phone: '',
@@ -132,11 +137,17 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                     <span>Subtotal</span><span className="font-semibold text-slate-900">₹{cartTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-slate-600">
-                    <span>Delivery</span><span className="font-semibold text-emerald-600">FREE</span>
+                    <span className="flex items-center gap-1.5"><Truck size={13}/> Delivery</span>
+                    {isFreeDelivery
+                      ? <span className="font-bold text-emerald-600 flex items-center gap-1"><span className="line-through text-slate-400 text-xs font-normal">₹49</span> FREE 🎉</span>
+                      : <span className="font-semibold text-slate-700">₹{deliveryCharge}</span>}
                   </div>
+                  {!isFreeDelivery && (
+                    <p className="text-[11px] text-amber-600 font-medium">Add ₹{(FREE_DELIVERY_THRESHOLD - cartTotal).toFixed(0)} more for FREE delivery</p>
+                  )}
                   <div className="flex justify-between pt-2 border-t border-slate-200">
                     <span className="font-bold text-slate-900">Total</span>
-                    <span className="text-xl font-bold text-slate-900">₹{cartTotal.toFixed(2)}</span>
+                    <span className="text-xl font-bold text-slate-900">₹{orderTotal.toFixed(2)}</span>
                   </div>
                 </div>
                 <button
@@ -242,12 +253,20 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </div>
 
                 {/* Order Total Reminder */}
-                <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-sm text-emerald-700">
-                    <CreditCard size={16} />
-                    <span className="font-semibold">Order Total</span>
+                <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-emerald-700">
+                      <CreditCard size={16} />
+                      <span className="font-semibold">Order Total</span>
+                    </div>
+                    <span className="text-lg font-bold text-emerald-800">₹{orderTotal.toFixed(2)}</span>
                   </div>
-                  <span className="text-lg font-bold text-emerald-800">₹{cartTotal.toFixed(2)}</span>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-xs text-emerald-600">Delivery</span>
+                    {isFreeDelivery
+                      ? <span className="text-xs font-bold text-emerald-600">FREE 🎉</span>
+                      : <span className="text-xs text-slate-600">₹{deliveryCharge}</span>}
+                  </div>
                 </div>
               </div>
 
@@ -310,10 +329,16 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Amount paid</span>
-                  <span className="font-bold text-emerald-700">₹{cartTotal.toFixed(2)}</span>
+                  <span className="font-bold text-emerald-700">₹{orderTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-500">Delivery</span>
+                  <span className="text-slate-500">Delivery charge</span>
+                  {isFreeDelivery
+                    ? <span className="font-bold text-emerald-600">FREE 🎉</span>
+                    : <span className="font-semibold text-slate-700">₹{deliveryCharge}</span>}
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500">Estimated delivery</span>
                   <span className="font-semibold text-slate-700">3–5 business days</span>
                 </div>
               </div>

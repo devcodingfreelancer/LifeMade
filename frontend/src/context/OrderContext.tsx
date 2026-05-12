@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface CartItem {
   id: string;
@@ -36,6 +37,7 @@ export interface Order {
 interface OrderContextType {
   cart: CartItem[];
   orderHistory: Order[];
+  isLoadingOrders: boolean;
   cartCount: number;
   cartTotal: number;
   addToCart: (item: CartItem) => void;
@@ -48,69 +50,75 @@ interface OrderContextType {
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
-const getAuthHeaders = (): Record<string, string> | undefined => {
-  const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Token ${token}` } : undefined;
-};
-
 export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { token, user } = useAuth();
+
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orderHistory, setOrderHistory] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
+  /* ── Restore cart from localStorage once ── */
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch {
-        setCart([]);
-      }
-    }
-
-    // Load order history if user is authenticated
-    const token = localStorage.getItem('token');
-    if (token) {
-      loadOrderHistory();
+      try { setCart(JSON.parse(savedCart)); } catch { setCart([]); }
     }
   }, []);
 
+  /* ── Persist cart to localStorage ── */
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  /* ── Re-fetch orders whenever token changes (login / logout / page reload) ──
+     - token becomes a non-null string → user just logged in → fetch their orders
+     - token becomes null            → user logged out      → clear orders        */
+  useEffect(() => {
+    if (token && user) {
+      loadOrderHistory();
+    } else {
+      // User logged out — clear stale order history immediately
+      setOrderHistory([]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  /* ── Load order history from API ── */
   const loadOrderHistory = async () => {
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) return;
+
+    setIsLoadingOrders(true);
     try {
-      const headers = getAuthHeaders();
-      // Check if user is admin
-      const user = localStorage.getItem('user');
-      const isAdmin = user ? JSON.parse(user).role === 'admin' : false;
-      
-      // Use admin orders endpoint for admins, regular orders endpoint for users
-      const endpoint = isAdmin 
-        ? 'https://lifemade.onrender.com/api/admin/orders/' 
+      const isAdmin = user?.role === 'admin';
+      const endpoint = isAdmin
+        ? 'https://lifemade.onrender.com/api/admin/orders/'
         : 'https://lifemade.onrender.com/api/orders/';
-      
+
       const response = await fetch(endpoint, {
-        headers: headers || {},
+        headers: { Authorization: `Token ${currentToken}` },
       });
 
       if (response.ok) {
         const orders = await response.json();
-        setOrderHistory(orders);
+        setOrderHistory(Array.isArray(orders) ? orders : []);
+      } else if (response.status === 401) {
+        // Token is invalid/expired — clear auth
+        setOrderHistory([]);
       }
     } catch (error) {
       console.error('Failed to load order history:', error);
+    } finally {
+      setIsLoadingOrders(false);
     }
   };
 
   const addToCart = (item: CartItem) => {
     setCart((currentCart) => {
-      const existing = currentCart.find((cartItem) => cartItem.id === item.id);
+      const existing = currentCart.find((c) => c.id === item.id);
       if (existing) {
-        return currentCart.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
-            : cartItem
+        return currentCart.map((c) =>
+          c.id === item.id ? { ...c, quantity: c.quantity + item.quantity } : c
         );
       }
       return [...currentCart, { ...item }];
@@ -124,53 +132,41 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateQuantity = (id: string, delta: number) => {
     setCart((currentCart) =>
       currentCart
-        .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity + delta } : item
-        )
+        .map((item) => (item.id === id ? { ...item, quantity: item.quantity + delta } : item))
         .filter((item) => item.quantity > 0)
     );
   };
 
-  const clearCart = () => {
-    setCart([]);
-  };
+  const clearCart = () => setCart([]);
 
   const placeOrder = async (shippingAddress: string) => {
-    if (cart.length === 0) {
-      throw new Error('Cart is empty');
+    if (cart.length === 0) throw new Error('Cart is empty');
+
+    const currentToken = localStorage.getItem('token');
+    if (!currentToken) throw new Error('Please log in to place an order');
+
+    const items = cart.map((item) => ({
+      product_id: parseInt(item.id),
+      quantity: item.quantity,
+    }));
+
+    const response = await fetch('https://lifemade.onrender.com/api/orders/create/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Token ${currentToken}`,
+      },
+      body: JSON.stringify({ shipping_address: shippingAddress, items }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to place order');
     }
 
-    try {
-      // Convert cart items to API format
-      const items = cart.map(item => ({
-        product_id: parseInt(item.id),
-        quantity: item.quantity,
-      }));
-
-      const response = await fetch('https://lifemade.onrender.com/api/orders/create/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(getAuthHeaders() || {}),
-        },
-        body: JSON.stringify({
-          shipping_address: shippingAddress,
-          items: items,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to place order');
-      }
-
-      // Reload order history and clear cart
-      await loadOrderHistory();
-      clearCart();
-    } catch (error) {
-      console.error('Place order error:', error);
-      throw error;
-    }
+    // Reload orders and clear cart after successful placement
+    await loadOrderHistory();
+    clearCart();
   };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -180,6 +176,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <OrderContext.Provider value={{
       cart,
       orderHistory,
+      isLoadingOrders,
       cartCount,
       cartTotal,
       addToCart,

@@ -36,6 +36,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, isFavor
             {qty} in cart
           </span>
         )}
+
+        {product.price >= 1500 && (
+          <span className="absolute left-4 bottom-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/90 px-3 py-1 text-[10px] font-bold text-white shadow backdrop-blur-sm">
+            <Truck size={12} /> FREE DELIVERY
+          </span>
+        )}
       </div>
 
       <div className="p-5">

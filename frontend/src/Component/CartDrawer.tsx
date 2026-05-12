@@ -1,4 +1,4 @@
-import { X, ShoppingCart, Minus, Plus, Trash2, Package, ArrowRight } from 'lucide-react';
+import { X, ShoppingCart, Minus, Plus, Trash2, Package, ArrowRight, Truck, Gift } from 'lucide-react';
 import { useOrders } from '../context/OrderContext';
 import { useEffect, useRef } from 'react';
 
@@ -8,24 +8,27 @@ interface CartDrawerProps {
   onCheckout: () => void;
 }
 
+const FREE_DELIVERY_THRESHOLD = 1500;
+
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) => {
   const { cart, cartTotal, updateQuantity, removeFromCart, clearCart } = useOrders();
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape key
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     if (isOpen) window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  // Lock body scroll when open
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
+
+  const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - cartTotal);
+  const progress = Math.min(100, (cartTotal / FREE_DELIVERY_THRESHOLD) * 100);
+  const isFreeDelivery = cartTotal >= FREE_DELIVERY_THRESHOLD;
+  const deliveryCharge = isFreeDelivery ? 0 : 49;
 
   return (
     <>
@@ -59,8 +62,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) 
                 onClick={clearCart}
                 className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
               >
-                <Trash2 size={14} />
-                Clear All
+                <Trash2 size={14} /> Clear All
               </button>
             )}
             <button
@@ -72,6 +74,38 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) 
             </button>
           </div>
         </div>
+
+        {/* ── Free Delivery Progress Bar (only when cart has items) ── */}
+        {cart.length > 0 && (
+          <div className={`px-5 py-3 border-b ${isFreeDelivery ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'}`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5">
+                <Truck size={14} className={isFreeDelivery ? 'text-emerald-600' : 'text-amber-600'} />
+                {isFreeDelivery ? (
+                  <span className="text-xs font-bold text-emerald-700">
+                    🎉 You've unlocked <span className="underline">Free Delivery!</span>
+                  </span>
+                ) : (
+                  <span className="text-xs font-semibold text-amber-700">
+                    Add <span className="font-bold text-amber-900">₹{remaining.toFixed(0)}</span> more for FREE delivery
+                  </span>
+                )}
+              </div>
+              {isFreeDelivery ? (
+                <Gift size={16} className="text-emerald-600" />
+              ) : (
+                <span className="text-[10px] font-bold text-amber-600">₹{cartTotal.toFixed(0)} / ₹{FREE_DELIVERY_THRESHOLD}</span>
+              )}
+            </div>
+            {/* Progress track */}
+            <div className="h-2 w-full rounded-full bg-white/70 overflow-hidden border border-white shadow-inner">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${isFreeDelivery ? 'bg-emerald-500' : 'bg-amber-400'}`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Cart Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
@@ -88,8 +122,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) 
                 onClick={onClose}
                 className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
               >
-                Continue Shopping
-                <ArrowRight size={16} />
+                Continue Shopping <ArrowRight size={16} />
               </button>
             </div>
           ) : (
@@ -154,12 +187,25 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) 
                 <span className="font-semibold text-slate-900">₹{cartTotal.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between text-sm text-slate-600">
-                <span>Delivery</span>
-                <span className="font-semibold text-emerald-600">Free</span>
+                <span className="flex items-center gap-1.5">
+                  <Truck size={13} /> Delivery
+                </span>
+                {isFreeDelivery ? (
+                  <span className="font-bold text-emerald-600 flex items-center gap-1">
+                    <span className="line-through text-slate-400 font-normal text-xs">₹49</span> FREE
+                  </span>
+                ) : (
+                  <span className="font-semibold text-slate-700">₹{deliveryCharge}</span>
+                )}
               </div>
+              {!isFreeDelivery && (
+                <div className="text-[11px] text-amber-600 font-medium">
+                  💡 Add ₹{remaining.toFixed(0)} more to get FREE delivery!
+                </div>
+              )}
               <div className="border-t border-slate-200 pt-2 flex items-center justify-between">
                 <span className="font-bold text-slate-900">Total</span>
-                <span className="text-xl font-bold text-slate-900">₹{cartTotal.toFixed(2)}</span>
+                <span className="text-xl font-bold text-slate-900">₹{(cartTotal + deliveryCharge).toFixed(2)}</span>
               </div>
             </div>
 
@@ -167,8 +213,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose, onCheckout }) 
               onClick={onCheckout}
               className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-700 active:scale-[0.98]"
             >
-              Proceed to Checkout
-              <ArrowRight size={18} />
+              Proceed to Checkout <ArrowRight size={18} />
             </button>
             <button
               onClick={onClose}

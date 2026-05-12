@@ -12,28 +12,32 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  token: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  // Load user from localStorage on mount
+  // Load user + token from localStorage on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    if (savedUser) {
+    const savedToken = localStorage.getItem('token');
+    if (savedUser && savedToken) {
       try {
         setUser(JSON.parse(savedUser));
+        setToken(savedToken);
       } catch (error) {
         console.error('Failed to parse saved user:', error);
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
       }
     }
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    // Validate input
     if (!email || !password) {
       throw new Error('Email and password are required');
     }
@@ -41,9 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await fetch('https://lifemade.onrender.com/api/auth/login/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
@@ -53,13 +55,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const data = await response.json();
+      
+      if (!data.user || !data.user.id) {
+        throw new Error('Invalid response from server');
+      }
+
       const userData: User = {
         id: data.user.id.toString(),
         email: data.user.email,
-        role: data.user.is_staff ? 'admin' : 'user', // Django uses is_staff for admin
+        role: data.user.is_staff ? 'admin' : 'user',
       };
 
       setUser(userData);
+      setToken(data.token);
       localStorage.setItem('user', JSON.stringify(userData));
       localStorage.setItem('token', data.token);
     } catch (error) {
@@ -69,27 +77,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (email: string, password: string): Promise<void> => {
-    // Validate input
-    if (!email || !password) {
-      throw new Error('Email and password are required');
-    }
-
-    if (!email.includes('@')) {
-      throw new Error('Please enter a valid email address');
-    }
-
-    if (password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
-    }
+    if (!email || !password) throw new Error('Email and password are required');
+    if (!email.includes('@')) throw new Error('Please enter a valid email address');
+    if (password.length < 6) throw new Error('Password must be at least 6 characters long');
 
     try {
       const response = await fetch('https://lifemade.onrender.com/api/auth/register/', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: email, // Using email as username for simplicity
+          username: email,
           email,
           password,
           password_confirm: password,
@@ -98,22 +95,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!response.ok) {
         const errorData = await response.json();
-        // Handle specific error messages
         if (errorData.username) throw new Error('Username already exists');
         if (errorData.email) throw new Error('Email already exists');
         throw new Error('Registration failed');
       }
 
       const data = await response.json();
+      
+      if (!data.id) {
+        throw new Error('Registration successful but missing user ID');
+      }
+
       const userData: User = {
         id: data.id.toString(),
         email: data.email,
-        role: 'user', // New registrations are regular users
+        role: 'user',
       };
 
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      // Note: Registration doesn't return token, user needs to login
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
@@ -122,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   };
@@ -132,7 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: !!user,
       login,
       register,
-      logout
+      logout,
+      token,
     }}>
       {children}
     </AuthContext.Provider>
