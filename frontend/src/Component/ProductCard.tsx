@@ -1,4 +1,4 @@
-import { Heart, HeartOff, ShoppingCart, Plus, Minus } from 'lucide-react';
+import { Heart, HeartOff, ShoppingCart, Plus, Minus, Truck } from 'lucide-react';
 import type { CartItem } from '../context/OrderContext';
 import type { Product } from '../context/ProductContext';
 import { useOrders } from '../context/OrderContext';

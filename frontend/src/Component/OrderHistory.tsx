@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '../context/OrderContext';
 import { useAuth } from '../context/AuthContext';
 import { 
-  ArrowRight, Truck, CheckCircle2, Clock, Package, 
+  Truck, CheckCircle2, Clock, Package, 
   RefreshCw, Search, Calendar, Filter, X 
 } from 'lucide-react';
 import { fadeUp, staggerContainer, staggerItem } from '../animations';
