@@ -48,7 +48,7 @@ class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
 class ProductCreateView(generics.CreateAPIView):
     queryset = Product.objects.all()
