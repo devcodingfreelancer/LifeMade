@@ -92,8 +92,8 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       const isAdmin = user?.role === 'admin';
       const endpoint = isAdmin
-        ? 'https://lifemade.onrender.com/api/admin/orders/'
-        : 'https://lifemade.onrender.com/api/orders/';
+        ? 'https://lifemade.onrender.com/admin/orders/'
+        : 'https://lifemade.onrender.com/orders/';
 
       const response = await fetch(endpoint, {
         headers: { Authorization: `Token ${currentToken}` },
@@ -150,7 +150,7 @@ export const OrderProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       quantity: item.quantity,
     }));
 
-    const response = await fetch('https://lifemade.onrender.com/api/orders/create/', {
+    const response = await fetch('https://lifemade.onrender.com/orders/create/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

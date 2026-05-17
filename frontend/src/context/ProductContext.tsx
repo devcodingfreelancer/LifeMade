@@ -49,7 +49,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsLoading(true);
     try {
       // Load products
-      const productsResponse = await fetch('https://lifemade.onrender.com/api/products/');
+      const productsResponse = await fetch('https://lifemade.onrender.com/products/');
       if (productsResponse.ok) {
         const productsData = await productsResponse.json();
         // Convert price to number for each product
@@ -66,7 +66,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const token = localStorage.getItem('token');
       if (token) {
         const headers = getAuthHeaders();
-        const categoriesResponse = await fetch('https://lifemade.onrender.com/api/categories/', {
+        const categoriesResponse = await fetch('https://lifemade.onrender.com/categories/', {
           headers: headers || {},
         });
         if (categoriesResponse.ok) {
@@ -88,7 +88,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const addProduct = async (product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://lifemade.onrender.com/api/products/create/', {
+      const response = await fetch('https://lifemade.onrender.com/products/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const updateProduct = async (id: number, updates: Partial<Product>) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`https://lifemade.onrender.com/api/products/${id}/`, {
+      const response = await fetch(`https://lifemade.onrender.com/products/${id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsLoading(true);
     try {
       const headers = getAuthHeaders();
-      const response = await fetch(`https://lifemade.onrender.com/api/products/${id}/`, {
+      const response = await fetch(`https://lifemade.onrender.com/products/${id}/`, {
         method: 'DELETE',
         headers: headers || {},
       });
@@ -179,7 +179,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const addCategory = async (category: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const response = await fetch('https://lifemade.onrender.com/api/categories/', {
+      const response = await fetch('https://lifemade.onrender.com/categories/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

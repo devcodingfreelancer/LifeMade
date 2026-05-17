@@ -78,7 +78,7 @@ export default function ProfilePage({ onWishlistClick, onOrdersClick }: ProfileP
     setFpStatus("loading");
     setFpMsg("");
     try {
-      const response = await fetch("https://lifemade.onrender.com/api/auth/password-reset/", {
+      const response = await fetch("https://lifemade.onrender.com/auth/password-reset/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),

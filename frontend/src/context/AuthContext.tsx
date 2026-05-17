@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
-      const response = await fetch('https://lifemade.onrender.com/api/auth/login/', {
+      const response = await fetch('https://lifemade.onrender.com/auth/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (password.length < 6) throw new Error('Password must be at least 6 characters long');
 
     try {
-      const response = await fetch('https://lifemade.onrender.com/api/auth/register/', {
+      const response = await fetch('https://lifemade.onrender.com/auth/register/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

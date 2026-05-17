@@ -41,7 +41,7 @@ const AdminOrdersList: React.FC = () => {
   const loadOrders = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://lifemade.onrender.com/api/admin/orders/', {
+      const response = await fetch('https://lifemade.onrender.com/admin/orders/', {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -65,7 +65,7 @@ const AdminOrdersList: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `https://lifemade.onrender.com/api/admin/orders/${selectedOrder.id}/`,
+        `https://lifemade.onrender.com/admin/orders/${selectedOrder.id}/`,
         {
           method: 'PATCH',
           headers: {
@@ -158,10 +158,10 @@ const AdminOrdersList: React.FC = () => {
                       <p className="text-sm text-gray-600">Status</p>
                       <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                         order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                        order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                          order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-gray-100 text-gray-800'
+                        }`}>
                         {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                       </span>
                     </div>

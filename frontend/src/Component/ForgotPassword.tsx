@@ -24,7 +24,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onClose, onBackToLogin 
 
     try {
       const response = await fetch(
-        "https://lifemade.onrender.com/api/auth/password-reset/",
+        "https://lifemade.onrender.com/auth/password-reset/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -11,7 +11,10 @@ interface SignupProps {
 const Signup: React.FC<SignupProps> = ({ onSuccess, onClose, onSwitchToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [medicalName, setMedicalName] = useState('');
+  const [address, setAddress] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -23,18 +26,20 @@ const Signup: React.FC<SignupProps> = ({ onSuccess, onClose, onSwitchToLogin }) 
     setSuccess('');
     setIsLoading(true);
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await register(email, password);
+      await register(email, password, {
+        name,
+        phone_number: phoneNumber,
+        medical_name: medicalName,
+        address
+      });
       setSuccess('Account created successfully! Redirecting...');
       setEmail('');
       setPassword('');
-      setConfirmPassword('');
+      setName('');
+      setPhoneNumber('');
+      setMedicalName('');
+      setAddress('');
       onSuccess?.();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Signup failed. Please try again.';
@@ -80,6 +85,71 @@ const Signup: React.FC<SignupProps> = ({ onSuccess, onClose, onSwitchToLogin }) 
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name
+              </label>
+              <input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                required
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <input
+                id="phoneNumber"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="10-digit number"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                required
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="medicalName" className="block text-sm font-medium text-gray-700 mb-2">
+              Medical Store Name
+            </label>
+            <input
+              id="medicalName"
+              type="text"
+              value={medicalName}
+              onChange={(e) => setMedicalName(e.target.value)}
+              placeholder="e.g. Apollo Pharmacy"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+              required
+              disabled={isLoading}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+              Full Address
+            </label>
+            <textarea
+              id="address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="House no., Street, Area, City, State - Pincode"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none resize-none h-20"
+              required
+              disabled={isLoading}
+            />
+          </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
@@ -105,23 +175,6 @@ const Signup: React.FC<SignupProps> = ({ onSuccess, onClose, onSwitchToLogin }) 
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
-              required
-              disabled={isLoading}
-              minLength={6}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
               required

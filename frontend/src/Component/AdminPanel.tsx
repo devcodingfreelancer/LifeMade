@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductContext';
-import { LogOut, BarChart3, Package, ShoppingCart } from 'lucide-react';
+import { LogOut, BarChart3, Package, ShoppingCart, Users } from 'lucide-react';
 import ProductsList from './ProductsList';
 import AdminOrdersList from './AdminOrdersList';
+import AdminUsersList from './AdminUsersList';
 
-const AdminPanel: React.FC = () => {
+interface AdminPanelProps {
+  initialTab?: 'products' | 'orders' | 'users';
+}
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
   const { user, logout } = useAuth();
   const { products } = useProducts();
-  const [activeTab, setActiveTab] = useState<'products' | 'orders'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'users'>(initialTab);
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
@@ -135,11 +140,23 @@ const AdminPanel: React.FC = () => {
           >
             Orders
           </button>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`px-6 py-3 font-semibold transition flex items-center gap-2 ${
+              activeTab === 'users'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+          >
+            <Users size={18} />
+            Users
+          </button>
         </div>
 
         {/* Content */}
         {activeTab === 'products' && <ProductsList />}
         {activeTab === 'orders' && <AdminOrdersList />}
+        {activeTab === 'users' && <AdminUsersList />}
       </main>
     </div>
   );
