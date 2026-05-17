@@ -15,7 +15,6 @@ interface OrderHistoryProps {
 const statusConfig: Record<string, { bg: string; text: string; dot: string }> = {
   delivered:  { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
   shipped:    { bg: 'bg-blue-50',    text: 'text-blue-700',    dot: 'bg-blue-500'    },
-  processing: { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500'   },
   pending:    { bg: 'bg-slate-50',   text: 'text-slate-600',   dot: 'bg-slate-400'   },
 };
 
@@ -149,7 +148,6 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
                   >
                     <option value="all">All Status</option>
                     <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
                     <option value="shipped">Shipped</option>
                     <option value="delivered">Delivered</option>
                   </select>
@@ -312,9 +310,9 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
                   {/* Status steps */}
                   <div className="px-6 pb-6">
                     <div className="flex items-center gap-0">
-                      {['pending', 'processing', 'shipped', 'delivered'].map((step, i, arr) => {
+                      {['pending', 'shipped', 'delivered'].map((step, i, arr) => {
                         const stepCfg = statusConfig[step] ?? statusConfig.pending;
-                        const statusOrder = ['pending', 'processing', 'shipped', 'delivered'];
+                        const statusOrder = ['pending', 'shipped', 'delivered'];
                         const currentIdx = statusOrder.indexOf(order.status);
                         const isDone = i <= currentIdx;
                         return (

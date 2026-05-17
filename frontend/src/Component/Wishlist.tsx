@@ -87,13 +87,13 @@ export default function Wishlist({ onGoShopping }: WishlistProps) {
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-2xl font-bold text-slate-900">₹{product.price.toFixed(2)}</span>
                     <div className="flex items-center gap-2">
-                      <button
+                      {/* <button
                         onClick={() => toggleFavorite(product.id.toString())}
                         className="p-2 rounded-xl border border-red-200 text-red-400 hover:bg-red-50 transition"
                         aria-label="Remove"
                       >
                         <Trash2 size={15} />
-                      </button>
+                      </button> */}
                       <button
                         onClick={() =>
                           addToCart({
