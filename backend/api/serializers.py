@@ -76,9 +76,7 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid credentials")
         except User.DoesNotExist:
             raise serializers.ValidationError("Invalid credentials")
-        except Exception as e:
-            logger.error(f"LoginSerializer error: {type(e).__name__}: {str(e)}", exc_info=True)
-            raise serializers.ValidationError("An error occurred during validation")
+        
         data['user'] = user
         return data
 

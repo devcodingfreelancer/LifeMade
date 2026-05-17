@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface Product {
   id: number;
@@ -43,13 +44,25 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { token, isAuthenticated } = useAuth();
 
   // Load products and categories from API
   const loadData = async () => {
+    // If not authenticated, clear products and categories for privacy
+    if (!token) {
+      setProducts([]);
+      setCategories([]);
+      return;
+    }
+
     setIsLoading(true);
     try {
+      const headers = getAuthHeaders() || {};
+      
       // Load products
-      const productsResponse = await fetch('https://lifemade.onrender.com/products/');
+      const productsResponse = await fetch('https://lifemade.onrender.com/products/', {
+        headers,
+      });
       if (productsResponse.ok) {
         const productsData = await productsResponse.json();
         // Convert price to number for each product
@@ -62,17 +75,13 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setProducts(processedProducts);
       }
 
-      // Load categories (only if authenticated)
-      const token = localStorage.getItem('token');
-      if (token) {
-        const headers = getAuthHeaders();
-        const categoriesResponse = await fetch('https://lifemade.onrender.com/categories/', {
-          headers: headers || {},
-        });
-        if (categoriesResponse.ok) {
-          const categoriesData = await categoriesResponse.json();
-          setCategories(categoriesData);
-        }
+      // Load categories
+      const categoriesResponse = await fetch('https://lifemade.onrender.com/categories/', {
+        headers,
+      });
+      if (categoriesResponse.ok) {
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData);
       }
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -83,7 +92,8 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   useEffect(() => {
     loadData();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, isAuthenticated]);
 
   const addProduct = async (product: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
     setIsLoading(true);
