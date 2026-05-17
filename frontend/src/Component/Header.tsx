@@ -228,14 +228,15 @@ export default function EnhancedHeader({
             )}
           </button>
 
-          {/* Orders */}
-          <button
-            onClick={onOrdersClick}
-            className={`flex items-center gap-2 border border-slate-200 bg-white text-slate-700 rounded-xl hover:border-green-300 hover:text-green-600 transition-all shadow-sm ${compact ? "px-3 py-2" : "px-4 py-2.5"}`}
-          >
-            <Box size={18} />
-            <span className="text-sm font-semibold hidden sm:block">My Orders</span>
-          </button>
+          {user.role !== "admin" && (
+            <button
+              onClick={onOrdersClick}
+              className={`flex items-center gap-2 border border-slate-200 bg-white text-slate-700 rounded-xl hover:border-green-300 hover:text-green-600 transition-all shadow-sm ${compact ? "px-3 py-2" : "px-4 py-2.5"}`}
+            >
+              <Box size={18} />
+              <span className="text-sm font-semibold hidden sm:block">My Orders</span>
+            </button>
+          )}
 
           {user.role === "admin" && (
             <button

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useProducts } from '../context/ProductContext';
 import { LogOut, BarChart3, Package, ShoppingCart, Users } from 'lucide-react';
@@ -6,18 +7,16 @@ import ProductsList from './ProductsList';
 import AdminOrdersList from './AdminOrdersList';
 import AdminUsersList from './AdminUsersList';
 
-interface AdminPanelProps {
-  initialTab?: 'products' | 'orders' | 'users';
-}
-
-const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
+const AdminPanel: React.FC = () => {
   const { user, logout } = useAuth();
   const { products } = useProducts();
-  const [activeTab, setActiveTab] = useState<'products' | 'orders' | 'users'>(initialTab);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
+      navigate('/');
     }
   };
 
@@ -27,13 +26,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
   const lowStockProducts = products.filter(p => p.stock < 10).length;
   const totalStock = products.reduce((sum, p) => sum + p.stock, 0);
 
+  // Determine active tab for styling
+  const path = location.pathname;
+  const activeTab = path.includes('/admin/orders') ? 'orders' : path.includes('/admin/users') ? 'users' : 'products';
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
+            <div className="bg-blue-600 p-2 rounded-lg cursor-pointer" onClick={() => navigate('/admin')}>
               <ShoppingCart className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -121,7 +124,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
         {/* Tabs */}
         <div className="flex gap-4 border-b border-gray-200 mb-8">
           <button
-            onClick={() => setActiveTab('products')}
+            onClick={() => navigate('/admin')}
             className={`px-6 py-3 font-semibold transition ${
               activeTab === 'products'
                 ? 'text-blue-600 border-b-2 border-blue-600'
@@ -131,7 +134,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
             Products
           </button>
           <button
-            onClick={() => setActiveTab('orders')}
+            onClick={() => navigate('/admin/orders')}
             className={`px-6 py-3 font-semibold transition ${
               activeTab === 'orders'
                 ? 'text-blue-600 border-b-2 border-blue-600'
@@ -141,7 +144,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
             Orders
           </button>
           <button
-            onClick={() => setActiveTab('users')}
+            onClick={() => navigate('/admin/users')}
             className={`px-6 py-3 font-semibold transition flex items-center gap-2 ${
               activeTab === 'users'
                 ? 'text-blue-600 border-b-2 border-blue-600'
@@ -154,9 +157,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ initialTab = 'products' }) => {
         </div>
 
         {/* Content */}
-        {activeTab === 'products' && <ProductsList />}
-        {activeTab === 'orders' && <AdminOrdersList />}
-        {activeTab === 'users' && <AdminUsersList />}
+        <Routes>
+          <Route path="/" element={<ProductsList />} />
+          <Route path="orders" element={<AdminOrdersList />} />
+          <Route path="users" element={<AdminUsersList />} />
+          <Route path="*" element={<Navigate to="/admin" />} />
+        </Routes>
       </main>
     </div>
   );

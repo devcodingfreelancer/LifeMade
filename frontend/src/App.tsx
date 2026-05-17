@@ -1,7 +1,7 @@
-
 import './App.css'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { FavoriteProvider } from './context/FavoriteContext'
 import { OrderProvider } from './context/OrderContext'
@@ -23,25 +23,30 @@ import ProfilePage from './Component/ProfilePage'
 import ForgotPassword from './Component/ForgotPassword'
 import SearchResults from './Component/SearchResults'
 
-type ViewType = 'home' | 'medicine' | 'admin' | 'orders' | 'contact' | 'wishlist' | 'profile' | 'search'
-
 function AppContent() {
   const [showLogin, setShowLogin] = useState(false)
   const [showSignup, setShowSignup] = useState(false)
   const [showCart, setShowCart] = useState(false)
   const [showCheckout, setShowCheckout] = useState(false)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
-  const [currentView, setCurrentView] = useState<ViewType>('home')
   const [searchQuery, setSearchQuery] = useState('')
   const { isAuthenticated, user } = useAuth()
+  
+  const navigate = useNavigate()
+  const location = useLocation()
 
+  // Protect routes that require authentication
   useEffect(() => {
     if (!isAuthenticated) {
-      if (currentView === 'orders' || currentView === 'admin' || currentView === 'profile' || currentView === 'wishlist') {
-        setCurrentView('home')
+      const protectedPaths = ['/orders', '/admin', '/profile', '/wishlist'];
+      if (protectedPaths.some(path => location.pathname.startsWith(path))) {
+        navigate('/')
+        setShowLogin(true)
       }
+    } else if (location.pathname.startsWith('/admin') && user?.role !== 'admin') {
+      navigate('/')
     }
-  }, [isAuthenticated, currentView])
+  }, [isAuthenticated, location.pathname, navigate, user?.role])
 
   const handleLoginClick = () => {
     setShowSignup(false)
@@ -64,7 +69,11 @@ function AppContent() {
       setShowLogin(true)
       return
     }
-    setCurrentView('orders')
+    if (user?.role === 'admin') {
+      navigate('/admin/users')
+    } else {
+      navigate('/orders')
+    }
   }
 
   const handleWishlistClick = () => {
@@ -72,7 +81,7 @@ function AppContent() {
       setShowLogin(true)
       return
     }
-    setCurrentView('wishlist')
+    navigate('/wishlist')
   }
 
   const handleProfileClick = () => {
@@ -80,39 +89,43 @@ function AppContent() {
       setShowLogin(true)
       return
     }
-    setCurrentView('profile')
+    navigate('/profile')
   }
 
   const handleSearchView = (query: string) => {
     setSearchQuery(query)
-    setCurrentView('search')
+    navigate(`/search?q=${encodeURIComponent(query)}`)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleMenuClick = (menu: string) => {
     if (menu === 'Medicine') {
-      setCurrentView('medicine')
+      navigate('/products')
     } else if (menu === 'Admin' && user?.role === 'admin') {
-      setCurrentView('admin')
+      navigate('/admin')
     } else if (menu === 'Home') {
-      setCurrentView('home')
+      navigate('/')
     } else if (menu === 'Contact Us') {
-      setCurrentView('contact')
+      navigate('/contactus')
     } else {
-      setCurrentView('home')
+      navigate('/')
     }
   }
 
   const handleLoginSuccess = () => {
     setShowLogin(false)
     setShowSignup(false)
-    setCurrentView('home')
+    if (user?.role === 'admin') {
+      navigate('/admin')
+    } else {
+      navigate('/')
+    }
   }
 
   const handleSignupSuccess = () => {
     setShowLogin(false)
     setShowSignup(false)
-    setCurrentView('home')
+    navigate('/')
   }
 
   const handleCheckout = () => {
@@ -125,41 +138,8 @@ function AppContent() {
   }
 
   const handleShopNow = () => {
-    setCurrentView('medicine')
+    navigate('/products')
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'home':
-        return <HomeMain onShopNow={handleShopNow} />
-      case 'medicine':
-        return <MedicalProducts />
-      case 'admin':
-        return <AdminPanel />
-      case 'orders':
-        return <OrderHistory onBack={() => setCurrentView('home')} />
-      case 'contact':
-        return <ContactUs />
-      case 'wishlist':
-        return <Wishlist onGoShopping={handleShopNow} />
-      case 'profile':
-        return (
-          <ProfilePage
-            onWishlistClick={() => setCurrentView('wishlist')}
-            onOrdersClick={handleOrdersClick}
-          />
-        )
-      case 'search':
-        return (
-          <SearchResults
-            initialQuery={searchQuery}
-            onBack={() => setCurrentView('home')}
-          />
-        )
-      default:
-        return <HomeMain onShopNow={handleShopNow} />
-    }
   }
 
   return (
@@ -214,13 +194,33 @@ function AppContent() {
       {/* ── Page views with slide-in transition ── */}
       <AnimatePresence mode="wait">
         <motion.div
-          key={currentView}
+          key={location.pathname}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
         >
-          {renderCurrentView()}
+          <Routes location={location}>
+            <Route path="/" element={<HomeMain onShopNow={handleShopNow} />} />
+            <Route path="/products" element={<MedicalProducts />} />
+            <Route path="/admin/*" element={user?.role === 'admin' ? <AdminPanel /> : <Navigate to="/" />} />
+            <Route path="/orders" element={<OrderHistory onBack={() => navigate('/')} />} />
+            <Route path="/contactus" element={<ContactUs />} />
+            <Route path="/wishlist" element={<Wishlist onGoShopping={handleShopNow} />} />
+            <Route path="/profile" element={
+              <ProfilePage
+                onWishlistClick={() => navigate('/wishlist')}
+                onOrdersClick={handleOrdersClick}
+              />
+            } />
+            <Route path="/search" element={
+              <SearchResults
+                initialQuery={searchQuery || new URLSearchParams(location.search).get('q') || ''}
+                onBack={() => navigate('/')}
+              />
+            } />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
         </motion.div>
       </AnimatePresence>
 
@@ -233,15 +233,17 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ProductProvider>
-        <FavoriteProvider>
-          <OrderProvider>
-            <AppContent />
-          </OrderProvider>
-        </FavoriteProvider>
-      </ProductProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <ProductProvider>
+          <FavoriteProvider>
+            <OrderProvider>
+              <AppContent />
+            </OrderProvider>
+          </FavoriteProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 

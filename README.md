@@ -38,36 +38,36 @@ python manage.py runserver
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register/` - User registration
-- `POST /api/auth/login/` - User login
+- `POST /auth/register/` - User registration
+- `POST /auth/login/` - User login
 
 ### Categories
-- `GET /api/categories/` - List categories (authenticated)
-- `POST /api/categories/` - Create category (authenticated)
-- `GET /api/categories/<id>/` - Get category details (authenticated)
-- `PUT /api/categories/<id>/` - Update category (authenticated)
-- `DELETE /api/categories/<id>/` - Delete category (authenticated)
+- `GET /categories/` - List categories (authenticated)
+- `POST /categories/` - Create category (authenticated)
+- `GET /categories/<id>/` - Get category details (authenticated)
+- `PUT /categories/<id>/` - Update category (authenticated)
+- `DELETE /categories/<id>/` - Delete category (authenticated)
 
 ### Products
-- `GET /api/products/` - List all products (public)
-- `POST /api/products/create/` - Create product (authenticated)
-- `GET /api/products/<id>/` - Get product details (authenticated)
-- `PUT /api/products/<id>/` - Update product (authenticated)
-- `DELETE /api/products/<id>/` - Delete product (authenticated)
+- `GET /products/` - List all products (public)
+- `POST /products/create/` - Create product (authenticated)
+- `GET /products/<id>/` - Get product details (authenticated)
+- `PUT /products/<id>/` - Update product (authenticated)
+- `DELETE /products/<id>/` - Delete product (authenticated)
 
 ### Orders
-- `GET /api/orders/` - List user's orders (authenticated)
-- `POST /api/orders/create/` - Create order (authenticated)
-- `GET /api/orders/<id>/` - Get order details (authenticated)
-- `PUT /api/orders/<id>/` - Update order (authenticated)
-- `GET /api/admin/orders/` - List all orders (admin only)
+- `GET /orders/` - List user's orders (authenticated)
+- `POST /orders/create/` - Create order (authenticated)
+- `GET /orders/<id>/` - Get order details (authenticated)
+- `PUT /orders/<id>/` - Update order (authenticated)
+- `GET /admin/orders/` - List all orders (admin only)
 
 ### Contact Us
-- `POST /api/contact/` - Submit contact form (public)
+- `POST /contactus/` - Submit contact form (public)
 
 ### Feedback
-- `GET /api/feedback/` - List feedback (authenticated)
-- `POST /api/feedback/create/` - Create feedback (authenticated)
+- `GET /feedback/` - List feedback (authenticated)
+- `POST /feedback/create/` - Create feedback (authenticated)
 
 ## Authentication
 

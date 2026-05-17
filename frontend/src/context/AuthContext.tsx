@@ -1,16 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+export interface UserProfile {
+  name: string;
+  phone_number: string;
+  medical_name: string;
+  address: string;
+}
+
 export interface User {
   id: string;
   email: string;
   role: 'user' | 'admin';
+  profile?: UserProfile;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, profileData?: Partial<UserProfile>) => Promise<void>;
   logout: () => void;
   token: string | null;
 }
@@ -64,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: data.user.id.toString(),
         email: data.user.email,
         role: data.user.is_staff ? 'admin' : 'user',
+        profile: data.user.profile,
       };
 
       setUser(userData);
@@ -76,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (email: string, password: string): Promise<void> => {
+  const register = async (email: string, password: string, profileData?: Partial<UserProfile>): Promise<void> => {
     if (!email || !password) throw new Error('Email and password are required');
     if (!email.includes('@')) throw new Error('Please enter a valid email address');
     if (password.length < 6) throw new Error('Password must be at least 6 characters long');
@@ -90,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email,
           password,
           password_confirm: password,
+          ...profileData
         }),
       });
 
@@ -100,20 +110,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Registration failed');
       }
 
-      const data = await response.json();
-      
-      if (!data.id) {
-        throw new Error('Registration successful but missing user ID');
-      }
-
-      const userData: User = {
-        id: data.id.toString(),
-        email: data.email,
-        role: 'user',
-      };
-
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      // Automatically log the user in to get the token, full user object (including ID and profile)
+      await login(email, password);
     } catch (error) {
       console.error('Registration error:', error);
       throw error;
