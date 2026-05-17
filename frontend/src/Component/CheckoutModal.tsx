@@ -4,6 +4,7 @@ import {
   Loader2, ChevronRight, Tag, Truck, Shield
 } from 'lucide-react';
 import { useOrders } from '../context/OrderContext';
+import { useAuth } from '../context/AuthContext';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -16,10 +17,12 @@ const FREE_DELIVERY_THRESHOLD = 1500;
 
 export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const { cart, cartTotal, placeOrder, clearCart } = useOrders();
+  const { user } = useAuth();
   const isFreeDelivery = cartTotal >= FREE_DELIVERY_THRESHOLD;
   const deliveryCharge = isFreeDelivery ? 0 : 49;
   const orderTotal = cartTotal + deliveryCharge;
   const [step, setStep] = useState<Step>('summary');
+  const [useDefaultAddress, setUseDefaultAddress] = useState(false);
   const [address, setAddress] = useState({
     line1: '', city: '', state: '', pincode: '', phone: '',
   });
@@ -44,20 +47,30 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  const fullAddress = `${address.line1}, ${address.city}, ${address.state} - ${address.pincode}. Ph: ${address.phone}`;
 
   const handlePlaceOrder = async () => {
-    if (!address.line1 || !address.city || !address.state || !address.pincode || !address.phone) {
-      setError('Please fill in all fields.');
-      return;
+    let finalAddress = '';
+    
+    if (useDefaultAddress) {
+      if (!user?.profile?.address || !user?.profile?.phone_number) {
+        setError('Default address or phone number is missing in your profile. Please add a custom address.');
+        return;
+      }
+      finalAddress = `${user.profile.address}. Ph: ${user.profile.phone_number}`;
+    } else {
+      if (!address.line1 || !address.city || !address.state || !address.pincode || !address.phone) {
+        setError('Please fill in all fields.');
+        return;
+      }
+      if (!/^\d{6}$/.test(address.pincode)) { setError('Enter a valid 6-digit pincode.'); return; }
+      if (!/^\d{10}$/.test(address.phone)) { setError('Enter a valid 10-digit phone number.'); return; }
+      finalAddress = `${address.line1}, ${address.city}, ${address.state} - ${address.pincode}. Ph: ${address.phone}`;
     }
-    if (!/^\d{6}$/.test(address.pincode)) { setError('Enter a valid 6-digit pincode.'); return; }
-    if (!/^\d{10}$/.test(address.phone)) { setError('Enter a valid 10-digit phone number.'); return; }
 
     setError('');
     setStep('placing');
     try {
-      await placeOrder(fullAddress);
+      await placeOrder(finalAddress);
       setOrderId(Math.floor(Math.random() * 90000) + 10000);
       setStep('success');
     } catch (e: any) {
@@ -187,63 +200,94 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
                   <span className="text-xs font-semibold text-emerald-600">Step 2 of 2</span>
                 </div>
 
+                <div className="flex gap-2 mb-4">
+                  <button 
+                    onClick={() => setUseDefaultAddress(true)}
+                    className={`flex-1 py-2 text-sm font-semibold rounded-xl border transition ${useDefaultAddress ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    Saved Address
+                  </button>
+                  <button 
+                    onClick={() => setUseDefaultAddress(false)}
+                    className={`flex-1 py-2 text-sm font-semibold rounded-xl border transition ${!useDefaultAddress ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    Custom Address
+                  </button>
+                </div>
+
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Street Address *</label>
-                    <input
-                      type="text"
-                      placeholder="House no., Street, Area"
-                      value={address.line1}
-                      onChange={e => setAddress(p => ({ ...p, line1: e.target.value }))}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">City *</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Mumbai"
-                        value={address.city}
-                        onChange={e => setAddress(p => ({ ...p, city: e.target.value }))}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
-                      />
+                  {useDefaultAddress ? (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                      {user?.profile?.address ? (
+                        <>
+                          <p className="font-semibold text-slate-900 mb-1">{user.profile.name || user.email}</p>
+                          <p className="whitespace-pre-wrap">{user.profile.address}</p>
+                          <p className="mt-2 font-medium">Phone: {user.profile.phone_number}</p>
+                        </>
+                      ) : (
+                        <p className="text-amber-600">No saved address found in your profile. Please add a custom address.</p>
+                      )}
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">State *</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Maharashtra"
-                        value={address.state}
-                        onChange={e => setAddress(p => ({ ...p, state: e.target.value }))}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">Pincode *</label>
-                      <input
-                        type="text"
-                        maxLength={6}
-                        placeholder="6-digit pincode"
-                        value={address.pincode}
-                        onChange={e => setAddress(p => ({ ...p, pincode: e.target.value.replace(/\D/g, '') }))}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">Phone *</label>
-                      <input
-                        type="text"
-                        maxLength={10}
-                        placeholder="10-digit mobile"
-                        value={address.phone}
-                        onChange={e => setAddress(p => ({ ...p, phone: e.target.value.replace(/\D/g, '') }))}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
-                      />
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1.5">Street Address *</label>
+                        <input
+                          type="text"
+                          placeholder="House no., Street, Area"
+                          value={address.line1}
+                          onChange={e => setAddress(p => ({ ...p, line1: e.target.value }))}
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">City *</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Mumbai"
+                            value={address.city}
+                            onChange={e => setAddress(p => ({ ...p, city: e.target.value }))}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">State *</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Maharashtra"
+                            value={address.state}
+                            onChange={e => setAddress(p => ({ ...p, state: e.target.value }))}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">Pincode *</label>
+                          <input
+                            type="text"
+                            maxLength={6}
+                            placeholder="6-digit pincode"
+                            value={address.pincode}
+                            onChange={e => setAddress(p => ({ ...p, pincode: e.target.value.replace(/\D/g, '') }))}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 mb-1.5">Phone *</label>
+                          <input
+                            type="text"
+                            maxLength={10}
+                            placeholder="10-digit mobile"
+                            value={address.phone}
+                            onChange={e => setAddress(p => ({ ...p, phone: e.target.value.replace(/\D/g, '') }))}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   {error && (
                     <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -325,7 +369,9 @@ export default function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               <div className="w-full rounded-2xl bg-slate-50 border border-slate-100 px-5 py-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Deliver to</span>
-                  <span className="font-semibold text-slate-800 text-right max-w-[60%]">{address.line1}, {address.city}</span>
+                  <span className="font-semibold text-slate-800 text-right max-w-[60%]">
+                    {useDefaultAddress ? user?.profile?.name || user?.email : `${address.line1}, ${address.city}`}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Amount paid</span>
