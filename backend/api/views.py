@@ -5,11 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from .models import Category, Product, Order, ContactUs, Feedback
+from .models import Category, Product, Order, ContactUs, Feedback, UserProfile
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer,
     CategorySerializer, ProductSerializer, OrderSerializer,
-    OrderCreateSerializer, ContactUsSerializer, FeedbackSerializer
+    OrderCreateSerializer, ContactUsSerializer, FeedbackSerializer,
+    UserProfileSerializer
 )
 
 # Auth Views
@@ -105,3 +106,9 @@ class FeedbackCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+# UserProfile Views
+class AdminUserListView(generics.ListAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAdminUser]

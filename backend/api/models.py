@@ -71,3 +71,23 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Feedback by {self.user.username} - {self.rating} stars"
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    name = models.CharField(max_length=200, blank=True)
+    phone_number = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True)
+    medical_name = models.CharField(max_length=200, blank=True)
+    address = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Profile of {self.user.username}"
+    
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = f"{self.user.first_name} {self.user.last_name}".strip() or self.user.username
+        if not self.email:
+            self.email = self.user.email
+        super().save(*args, **kwargs)

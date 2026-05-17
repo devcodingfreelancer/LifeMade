@@ -28,4 +28,7 @@ urlpatterns = [
     # Feedback
     path('feedback/', views.FeedbackListView.as_view(), name='feedback-list'),
     path('feedback/create/', views.FeedbackCreateView.as_view(), name='feedback-create'),
+
+    # Admin Users
+    path('admin/users/', views.AdminUserListView.as_view(), name='admin-users-list'),
 ]
