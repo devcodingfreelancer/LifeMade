@@ -3,18 +3,32 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .models import Category, Product, Order, OrderItem, ContactUs, Feedback, UserProfile
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = ['id', 'username', 'name', 'phone_number', 'email', 'medical_name', 'address', 'created_at', 'updated_at']
+
 class UserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(read_only=True)
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'profile']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
     password_confirm = serializers.CharField(write_only=True)
+    
+    # UserProfile fields
+    name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    phone_number = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    medical_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    address = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'password_confirm', 'first_name', 'last_name']
+        fields = ['username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'name', 'phone_number', 'medical_name', 'address']
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -22,8 +36,21 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        profile_data = {
+            'name': validated_data.pop('name', ''),
+            'phone_number': validated_data.pop('phone_number', ''),
+            'medical_name': validated_data.pop('medical_name', ''),
+            'address': validated_data.pop('address', '')
+        }
         validated_data.pop('password_confirm')
         user = User.objects.create_user(**validated_data)
+        
+        # Create UserProfile
+        UserProfile.objects.create(
+            user=user,
+            email=user.email,
+            **profile_data
+        )
         return user
 
 class LoginSerializer(serializers.Serializer):

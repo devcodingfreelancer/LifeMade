@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Order, OrderItem, ContactUs, Feedback
+from .models import Category, Product, Order, OrderItem, ContactUs, Feedback, UserProfile
 
 # Register your models here.
 
@@ -42,3 +42,9 @@ class FeedbackAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'user__email', 'comment']
     list_filter = ['rating', 'created_at']
     readonly_fields = ['created_at']
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'name', 'email', 'phone_number', 'medical_name']
+    search_fields = ['user__username', 'name', 'email', 'phone_number']
+    list_filter = ['created_at']
