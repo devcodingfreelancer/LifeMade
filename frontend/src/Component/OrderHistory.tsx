@@ -145,6 +145,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 appearance-none"
+                    title="Select order status"
                   >
                     <option value="all">All Status</option>
                     <option value="pending">Pending</option>
@@ -162,6 +163,7 @@ const OrderHistory: React.FC<OrderHistoryProps> = ({ onBack }) => {
                       value={dateFilter}
                       onChange={(e) => setDateFilter(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      title="Select order date"
                     />
                   </div>
                 </div>

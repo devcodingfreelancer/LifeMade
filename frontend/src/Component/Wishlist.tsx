@@ -1,4 +1,4 @@
-import { Heart, ShoppingCart, Trash2, Package } from "lucide-react";
+import { Heart, ShoppingCart, Package } from "lucide-react";
 import { useFavorites } from "../context/FavoriteContext";
 import { useProducts } from "../context/ProductContext";
 import { useOrders } from "../context/OrderContext";
