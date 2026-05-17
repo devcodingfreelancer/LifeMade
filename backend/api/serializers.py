@@ -14,10 +14,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'name', 'phone_number', 'email', 'medical_name', 'address', 'created_at', 'updated_at']
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = UserProfileSerializer(read_only=True)
+    profile = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'profile']
+    
+    def get_profile(self, obj):
+        try:
+            profile = obj.profile
+            return UserProfileSerializer(profile).data
+        except Exception:
+            return None
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
