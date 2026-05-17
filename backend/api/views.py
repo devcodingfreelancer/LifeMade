@@ -24,9 +24,13 @@ class RegisterView(generics.CreateAPIView):
     
     def create(self, request, *args, **kwargs):
         try:
+            logger.info(f"Registration attempt with data: {request.data}")
             return super().create(request, *args, **kwargs)
         except Exception as e:
-            logger.error(f"Registration error: {str(e)}", exc_info=True)
+            import traceback
+            error_msg = f"Registration error: {type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+            logger.error(error_msg)
+            print(error_msg)  # Also print to stdout for Render logs
             return Response(
                 {'error': 'An error occurred during registration. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -37,6 +41,7 @@ class LoginView(APIView):
 
     def post(self, request):
         try:
+            logger.info(f"Login attempt with data: {request.data}")
             serializer = LoginSerializer(data=request.data)
             if serializer.is_valid():
                 user = serializer.validated_data['user']
@@ -45,9 +50,13 @@ class LoginView(APIView):
                     'token': token.key,
                     'user': UserSerializer(user).data
                 })
+            logger.warning(f"Login validation errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"Login error: {str(e)}", exc_info=True)
+            import traceback
+            error_msg = f"Login error: {type(e).__name__}: {str(e)}\n{traceback.format_exc()}"
+            logger.error(error_msg)
+            print(error_msg)  # Also print to stdout for Render logs
             return Response(
                 {'error': 'An error occurred during login. Please try again.'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

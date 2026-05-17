@@ -2,6 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from .models import Category, Product, Order, OrderItem, ContactUs, Feedback, UserProfile
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
@@ -65,6 +68,9 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid credentials")
         except User.DoesNotExist:
             raise serializers.ValidationError("Invalid credentials")
+        except Exception as e:
+            logger.error(f"LoginSerializer error: {type(e).__name__}: {str(e)}", exc_info=True)
+            raise serializers.ValidationError("An error occurred during validation")
         data['user'] = user
         return data
 
