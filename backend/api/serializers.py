@@ -153,10 +153,3 @@ class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = '__all__'
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username', read_only=True)
-
-    class Meta:
-        model = UserProfile
-        fields = ['id', 'username', 'name', 'phone_number', 'email', 'medical_name', 'address', 'created_at', 'updated_at']
